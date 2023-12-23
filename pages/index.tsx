@@ -1,109 +1,71 @@
-import { ConnectWallet } from "@thirdweb-dev/react";
-import styles from "../styles/Home.module.css";
-import Image from "next/image";
-import { NextPage } from "next";
+import {
+  ConnectWallet,
+  Web3Button,
+  useAddress,
+  useContract,
+} from "@thirdweb-dev/react"
+import styles from "../styles/Home.module.css"
+import { NextPage } from "next"
+import { useState } from "react"
 
 const Home: NextPage = () => {
+  const myAddress = useAddress() // 리액트 훅 : 메타마스크의 주소를 가져오는 함수
+  const contractAddress = "0x069DFBCaBc5006A40ecC5Be3800eEec95BFDe245"
+  const { contract } = useContract(contractAddress)
+  const [counter, setCounter] = useState<string | undefined>()
+
+  async function getCounter() {
+    if (!contract) return
+    const counter = await contract.call("getCounter")
+    setCounter(counter.toString())
+  }
+  getCounter()
+
   return (
-    <main className={styles.main}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            Welcome to{" "}
-            <span className={styles.gradientText0}>
-              <a
-                href="https://thirdweb.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                thirdweb.
-              </a>
-            </span>
-          </h1>
-
-          <p className={styles.description}>
-            Get started by configuring your desired network in{" "}
-            <code className={styles.code}>src/index.js</code>, then modify the{" "}
-            <code className={styles.code}>src/App.js</code> file!
-          </p>
-
-          <div className={styles.connect}>
-            <ConnectWallet
-              dropdownPosition={{
-                side: "bottom",
-                align: "center",
-              }}
-            />
-          </div>
+    <div className={styles.container}>
+      <main className={styles.main}>
+        <div className={styles.title}>
+          <h3>My Counter DApp</h3>
         </div>
+
+        <div className={styles.description}>
+          contract address: {contractAddress} <br />
+          your metamask address: {myAddress}
+        </div>
+
+        <h3 className={styles.title}>{counter}</h3>
 
         <div className={styles.grid}>
-          <a
-            href="https://portal.thirdweb.com/"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/portal-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText1}>Portal ➜</h2>
-              <p>
-                Guides, references, and resources that will help you build with
-                thirdweb.
-              </p>
-            </div>
-          </a>
+          <div className={styles.card}>
+            <Web3Button
+              contractAddress={contractAddress}
+              action={(contract) => contract.call("decrementCounter")}
+            >
+              <h1> - </h1>
+            </Web3Button>
+          </div>
 
-          <a
-            href="https://thirdweb.com/dashboard"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/dashboard-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText2}>Dashboard ➜</h2>
-              <p>
-                Deploy, configure, and manage your smart contracts from the
-                dashboard.
-              </p>
-            </div>
-          </a>
+          <div className={styles.card}>
+            <Web3Button
+              contractAddress={contractAddress}
+              action={() => getCounter()}
+            >
+              <h1> Refresh </h1>
+            </Web3Button>
+          </div>
 
-          <a
-            href="https://thirdweb.com/templates"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/templates-preview.png"
-              alt="Placeholder preview of templates"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText3}>Templates ➜</h2>
-              <p>
-                Discover and clone template projects showcasing thirdweb
-                features.
-              </p>
-            </div>
-          </a>
+          <div className={styles.card}>
+            <Web3Button
+              contractAddress={contractAddress}
+              action={(contract) => contract.call("incrementCounter")}
+            >
+              <h1> + </h1>
+            </Web3Button>
+          </div>
         </div>
-      </div>
-    </main>
-  );
-};
+      </main>
+    </div>
+  )
+}
 
-export default Home;
+export default Home
